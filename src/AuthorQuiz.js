@@ -8,4 +8,4 @@ function AuthorQuiz() {
   );
 }
 
-export default App;
+export default AuthorQuiz;
