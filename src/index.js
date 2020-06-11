@@ -1,8 +1,10 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
+import { BrowserRouter, Route, withRouter } from 'react-router-dom';
 import './index.css';
 import AuthorQuiz from './AuthorQuiz';
 import {shuffle, sample} from 'underscore';
+import AddAuthorForm from './AddAuthorForm';
 import * as serviceWorker from './serviceWorker';
 
 const authors = [
@@ -72,10 +74,14 @@ function getTurnData(authors) {
   }
 }
 
-const state = {
-  turnData: getTurnData(authors),
-  highlight: ''
-};
+function resetState() {
+  return {
+    turnData: getTurnData(authors),
+    highlight: ''
+  }
+}
+
+let state = resetState();
 
 function onAnswerSelected(answer) {
   const isCorrect = state.turnData.author.books.some((book) => book === answer);
@@ -83,9 +89,31 @@ function onAnswerSelected(answer) {
   render();
 }
 
+function App() {
+  return <AuthorQuiz {...state} 
+    onAnswerSelected={onAnswerSelected}
+    onContinue={() => {
+      state = resetState();
+      render();
+    }}
+  />
+}
+
+const AuthorWrapper = withRouter(({ history }) =>
+  <AddAuthorForm onAddAuthor={(author) => {
+    authors.push(author);
+    history.push('/');
+  }} />
+);
 
 function render() {
-  ReactDOM.render(<AuthorQuiz {...state} onAnswerSelected={onAnswerSelected}/>, document.getElementById('root'));
+  ReactDOM.render(
+  <BrowserRouter>
+    <React.Fragment>
+      <Route exact path="/" component={App} />
+      <Route path="/add" component={AuthorWrapper}/>
+    </React.Fragment>
+  </BrowserRouter>, document.getElementById('root'));
 }
 
 // If you want your app to work offline and load faster, you can change
